@@ -7,12 +7,15 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.luanasproject.Myproject.dto.ClientDTO;
 import com.luanasproject.Myproject.entities.Client;
 import com.luanasproject.Myproject.repositories.ClientRepository;
+import com.luanasproject.Myproject.services.exceptions.DatabaseException;
 import com.luanasproject.Myproject.services.exceptions.ResourceNotFoundException;
 
 @Service
@@ -59,7 +62,19 @@ public class ClientService {
 		return new ClientDTO(entity);
 		}
 		catch(EntityNotFoundException e) {
-			throw new ResourceNotFoundException("Id not found " + id );
+			throw new ResourceNotFoundException("Id not found ! Try to update another id different of id " + id );
+		}
+	}
+
+	public void delete(Long id) {
+		try {
+		repository.deleteById(id);
+		}
+		catch(EmptyResultDataAccessException e) {
+			throw new ResourceNotFoundException("Id not found, Try to delete another id different of id " + id);
+		}
+		catch(DataIntegrityViolationException e) {
+			throw new DatabaseException("Delete not permitted due to Integrity violation.");
 		}
 	}
 
